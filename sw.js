@@ -7,7 +7,12 @@ const ASSETS = [
   'https://unpkg.com/react-dom@18/umd/react-dom.production.min.js',
   'https://unpkg.com/@babel/standalone/babel.min.js'
 ];
-
+self.addEventListener('install', e => e.waitUntil(
+  caches.open('ca-tracker-v1').then(c => c.addAll(['/PULI/index.html']))
+));
+self.addEventListener('fetch', e => e.respondWith(
+  caches.match(e.request).then(r => r || fetch(e.request))
+));
 self.addEventListener('install', e => {
   e.waitUntil(
     caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS)).catch(() => {})
