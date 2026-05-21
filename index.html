@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#c9a227" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="CA Tracker" />
+  <meta name="description" content="CA Intermediate ICAI New Scheme Study Tracker" />
+  <title>CA Inter Study Tracker</title>
+  <link rel="manifest" href="./manifest.json" />
+  <!-- Apple touch icons (generated as colored placeholders) -->
+  <link rel="apple-touch-icon" href="./icon-192.png" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #0a0f1e; font-family: 'Georgia', serif; color: #e8dcc8; -webkit-tap-highlight-color: transparent; }
+    #root { min-height: 100vh; }
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-track { background: #0a0f1e; }
+    ::-webkit-scrollbar-thumb { background: #2a3a54; border-radius: 2px; }
+    input, select, textarea {
+      background: #0d1b2a !important; color: #e8dcc8 !important;
+      border: 1px solid #2a3a54 !important; border-radius: 6px !important;
+      padding: 8px 10px !important; font-family: 'Georgia', serif !important;
+      font-size: 13px !important; width: 100%; outline: none;
+      -webkit-appearance: none; appearance: none;
+    }
+    input:focus, select:focus, textarea:focus { border-color: #c9a227 !important; }
+    select option { background: #0d1b2a; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+    @keyframes slideIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+    .safe-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<script type="text/babel">
+const { useState, useEffect, useCallback } = React;
+
+// ─── DATA ─────────────────────────────────────────────────────────────────────
+const SUBJECTS = [
+  { id:"P1", name:"Advanced Accounting", group:1, color:"#1a6b3c", accent:"#34d399", short:"Adv. Acc." },
+  { id:"P2", name:"Corporate & Other Laws", group:1, color:"#1e3a5f", accent:"#60a5fa", short:"Corp. Laws" },
+  { id:"P3", name:"Taxation (IT + GST)", group:1, color:"#5c1a0a", accent:"#fb923c", short:"Taxation" },
+  { id:"P4", name:"Cost & Mgmt Accounting", group:2, color:"#3b1a6b", accent:"#a78bfa", short:"CMA" },
+  { id:"P5", name:"Auditing & Ethics", group:2, color:"#1a4a5c", accent:"#22d3ee", short:"Audit" },
+  { id:"P6", name:"Financial & Strategic Mgmt", group:2, color:"#4a1a2c", accent:"#f472b6", short:"FM & SM" },
+];
+
+const CHAPTERS = {
+  P1:[
+    {id:"P1-1",name:"AS 1 – Disclosure of Accounting Policies",type:"Conceptual"},
+    {id:"P1-2",name:"AS 2 – Valuation of Inventories",type:"Numerical"},
+    {id:"P1-3",name:"AS 3 – Cash Flow Statements",type:"Numerical"},
+    {id:"P1-4",name:"AS 4 – Contingencies and Events After Balance Sheet Date",type:"Conceptual"},
+    {id:"P1-5",name:"AS 5 – Net Profit/Loss, Prior Period Items & Accounting Changes",type:"Conceptual"},
+    {id:"P1-6",name:"AS 7 – Construction Contracts",type:"Numerical"},
+    {id:"P1-7",name:"AS 9 – Revenue Recognition",type:"Conceptual"},
+    {id:"P1-8",name:"AS 10 – Property, Plant and Equipment",type:"Numerical"},
+    {id:"P1-9",name:"AS 11 – Effects of Changes in Foreign Exchange Rates",type:"Numerical"},
+    {id:"P1-10",name:"AS 12 – Accounting for Government Grants",type:"Numerical"},
+    {id:"P1-11",name:"AS 13 – Accounting for Investments",type:"Numerical"},
+    {id:"P1-12",name:"AS 14 – Accounting for Amalgamations",type:"Numerical"},
+    {id:"P1-13",name:"AS 15 – Employee Benefits",type:"Numerical"},
+    {id:"P1-14",name:"AS 16 – Borrowing Costs",type:"Numerical"},
+    {id:"P1-15",name:"AS 17 – Segment Reporting",type:"Conceptual"},
+    {id:"P1-16",name:"AS 18 – Related Party Disclosures",type:"Conceptual"},
+    {id:"P1-17",name:"AS 19 – Leases",type:"Numerical"},
+    {id:"P1-18",name:"AS 20 – Earnings Per Share",type:"Numerical"},
+    {id:"P1-19",name:"AS 21 – Consolidated Financial Statements",type:"Numerical"},
+    {id:"P1-20",name:"AS 22 – Accounting for Taxes on Income",type:"Numerical"},
+    {id:"P1-21",name:"AS 24 – Discontinuing Operations",type:"Conceptual"},
+    {id:"P1-22",name:"AS 26 – Intangible Assets",type:"Numerical"},
+    {id:"P1-23",name:"AS 27 – Financial Reporting of Interests in Joint Ventures",type:"Numerical"},
+    {id:"P1-24",name:"AS 28 – Impairment of Assets",type:"Numerical"},
+    {id:"P1-25",name:"AS 29 – Provisions, Contingent Liabilities and Contingent Assets",type:"Conceptual"},
+    {id:"P1-26",name:"Financial Statements of Companies",type:"Numerical"},
+    {id:"P1-27",name:"Buy Back of Securities",type:"Numerical"},
+    {id:"P1-28",name:"Amalgamation of Companies",type:"Numerical"},
+    {id:"P1-29",name:"Internal Reconstruction",type:"Numerical"},
+    {id:"P1-30",name:"Branch Accounts including Foreign Branches",type:"Numerical"},
+    {id:"P1-31",name:"Liquidation of Companies",type:"Numerical"},
+  ],
+  P2:[
+    {id:"P2-1",name:"Preliminary",type:"Theory"},
+    {id:"P2-2",name:"Incorporation of Company and Matters Incidental Thereto",type:"Theory"},
+    {id:"P2-3",name:"Prospectus and Allotment of Securities",type:"Theory"},
+    {id:"P2-4",name:"Share Capital and Debentures",type:"Theory"},
+    {id:"P2-5",name:"Acceptance of Deposits by Companies",type:"Theory"},
+    {id:"P2-6",name:"Registration of Charges",type:"Theory"},
+    {id:"P2-7",name:"Management and Administration",type:"Theory"},
+    {id:"P2-8",name:"Declaration and Payment of Dividend",type:"Theory"},
+    {id:"P2-9",name:"Accounts of Companies",type:"Theory"},
+    {id:"P2-10",name:"Audit and Auditors",type:"Theory"},
+    {id:"P2-11",name:"Companies Incorporated Outside India",type:"Theory"},
+    {id:"P2-12",name:"Limited Liability Partnership Act, 2008",type:"Theory"},
+    {id:"P2-13",name:"The General Clauses Act, 1897",type:"Theory"},
+    {id:"P2-14",name:"Interpretation of Statutes",type:"Theory"},
+    {id:"P2-15",name:"Foreign Exchange Management Act, 1999",type:"Theory"},
+  ],
+  P3:[
+    {id:"P3-1",name:"Basic Concepts",type:"Theory + Numerical"},
+    {id:"P3-2",name:"Residence and Scope of Total Income",type:"Theory + Numerical"},
+    {id:"P3-3",name:"Income from Salaries",type:"Numerical"},
+    {id:"P3-4",name:"Income from House Property",type:"Numerical"},
+    {id:"P3-5",name:"Profits and Gains of Business or Profession",type:"Numerical"},
+    {id:"P3-6",name:"Capital Gains",type:"Numerical"},
+    {id:"P3-7",name:"Income from Other Sources",type:"Numerical"},
+    {id:"P3-8",name:"Clubbing of Income",type:"Numerical"},
+    {id:"P3-9",name:"Set-off and Carry Forward of Losses",type:"Numerical"},
+    {id:"P3-10",name:"Deductions from Gross Total Income",type:"Numerical"},
+    {id:"P3-11",name:"Advance Tax",type:"Theory + Numerical"},
+    {id:"P3-12",name:"Tax Deduction at Source and Tax Collection at Source",type:"Theory + Numerical"},
+    {id:"P3-13",name:"Return of Income",type:"Theory"},
+    {id:"P3-14",name:"Computation of Total Income and Tax Liability",type:"Numerical"},
+    {id:"P3-G1",name:"GST – Introduction to GST",type:"Theory"},
+    {id:"P3-G2",name:"GST – Supply under GST",type:"Theory"},
+    {id:"P3-G3",name:"GST – Charge of GST",type:"Theory + Numerical"},
+    {id:"P3-G4",name:"GST – Place of Supply",type:"Theory"},
+    {id:"P3-G5",name:"GST – Exemptions from GST",type:"Theory"},
+    {id:"P3-G6",name:"GST – Time of Supply",type:"Numerical"},
+    {id:"P3-G7",name:"GST – Value of Supply",type:"Numerical"},
+    {id:"P3-G8",name:"GST – Input Tax Credit",type:"Numerical"},
+    {id:"P3-G9",name:"GST – Registration",type:"Theory"},
+    {id:"P3-G10",name:"GST – Tax Invoice, Credit and Debit Notes",type:"Theory"},
+    {id:"P3-G11",name:"GST – Accounts and Records",type:"Theory"},
+    {id:"P3-G12",name:"GST – E-Way Bill",type:"Theory"},
+    {id:"P3-G13",name:"GST – Payment of Tax",type:"Theory + Numerical"},
+    {id:"P3-G14",name:"GST – TDS and TCS under GST",type:"Theory"},
+    {id:"P3-G15",name:"GST – Returns",type:"Theory"},
+  ],
+  P4:[
+    {id:"P4-1",name:"Introduction to Cost and Management Accounting",type:"Theory"},
+    {id:"P4-2",name:"Material Cost",type:"Numerical"},
+    {id:"P4-3",name:"Employee Cost and Direct Expenses",type:"Numerical"},
+    {id:"P4-4",name:"Overheads – Absorption Costing Method",type:"Numerical"},
+    {id:"P4-5",name:"Activity Based Costing",type:"Numerical"},
+    {id:"P4-6",name:"Cost Sheet",type:"Numerical"},
+    {id:"P4-7",name:"Cost Accounting Systems",type:"Theory + Numerical"},
+    {id:"P4-8",name:"Unit and Batch Costing",type:"Numerical"},
+    {id:"P4-9",name:"Job Costing",type:"Numerical"},
+    {id:"P4-10",name:"Process and Operation Costing",type:"Numerical"},
+    {id:"P4-11",name:"Joint Products and By-Products",type:"Numerical"},
+    {id:"P4-12",name:"Service Costing",type:"Numerical"},
+    {id:"P4-13",name:"Standard Costing",type:"Numerical"},
+    {id:"P4-14",name:"Marginal Costing",type:"Numerical"},
+    {id:"P4-15",name:"Budgets and Budgetary Control",type:"Numerical"},
+  ],
+  P5:[
+    {id:"P5-1",name:"Nature, Objective and Scope of Audit",type:"Theory"},
+    {id:"P5-2",name:"Audit Strategy, Audit Planning and Audit Programme",type:"Theory"},
+    {id:"P5-3",name:"Risk Assessment and Internal Control",type:"Theory"},
+    {id:"P5-4",name:"Audit Evidence",type:"Theory"},
+    {id:"P5-5",name:"Audit of Items of Financial Statements",type:"Theory"},
+    {id:"P5-6",name:"Audit Documentation",type:"Theory"},
+    {id:"P5-7",name:"Completion and Review",type:"Theory"},
+    {id:"P5-8",name:"Audit Report",type:"Theory"},
+    {id:"P5-9",name:"Special Features of Audit of Different Types of Entities",type:"Theory"},
+    {id:"P5-10",name:"Audit of Banks",type:"Theory"},
+    {id:"P5-11",name:"Ethics and Terms of Audit Engagements",type:"Theory"},
+  ],
+  P6:[
+    {id:"P6-1",name:"Scope and Objectives of Financial Management",type:"Theory"},
+    {id:"P6-2",name:"Types of Financing",type:"Theory + Numerical"},
+    {id:"P6-3",name:"Financial Analysis and Planning – Ratio Analysis",type:"Numerical"},
+    {id:"P6-4",name:"Cost of Capital",type:"Numerical"},
+    {id:"P6-5",name:"Financing Decisions – Capital Structure",type:"Theory + Numerical"},
+    {id:"P6-6",name:"Financing Decisions – Leverages",type:"Numerical"},
+    {id:"P6-7",name:"Investment Decisions",type:"Numerical"},
+    {id:"P6-8",name:"Dividend Decisions",type:"Theory + Numerical"},
+    {id:"P6-9",name:"Management of Working Capital",type:"Numerical"},
+    {id:"P6-10",name:"SM – Introduction to Strategic Management",type:"Theory"},
+    {id:"P6-11",name:"SM – External Environment Analysis",type:"Theory"},
+    {id:"P6-12",name:"SM – Internal Environment Analysis",type:"Theory"},
+    {id:"P6-13",name:"SM – Strategic Choices",type:"Theory"},
+    {id:"P6-14",name:"SM – Strategy Implementation and Evaluation",type:"Theory"},
+  ],
+};
+
+const CHECKLIST_STAGES = ["1st Read","Understand","Practice","Revision 1","Revision 2","Revision 3","Mock Done"];
+const STUDY_MODES = ["Self Study","Coaching Class","Revision","Mock Test","Online Lecture"];
+const DIFFICULTY_LEVELS = ["Easy","Moderate","Hard","Very Hard"];
+const MOODS = ["😄 Great","🙂 Good","😐 Okay","😔 Low","😤 Stressed"];
+const TARGET_HOURS = 120;
+const STORAGE_KEY = "ca_inter_tracker_v2";
+
+// ─── LOCAL STORAGE (works on phone) ──────────────────────────────────────────
+const loadData = () => {
+  try { const d = localStorage.getItem(STORAGE_KEY); return d ? JSON.parse(d) : null; }
+  catch { return null; }
+};
+const saveData = (data) => {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch {}
+};
+
+const defaultState = () => ({
+  studyLog: [],
+  checklists: Object.fromEntries(
+    Object.values(CHAPTERS).flat().map(ch => [ch.id, { stages:{}, notes:"" }])
+  ),
+  targets: {
+    examDateG1:"2026-11-03", examDateG2:"2026-11-12", dailyTarget:10,
+    mockScores: Object.fromEntries(SUBJECTS.map(s => [s.id, { target:65, m1:"", m2:"", m3:"" }])),
+  },
+});
+
+// ─── ICON ─────────────────────────────────────────────────────────────────────
+const Icon = ({ name, size=18 }) => {
+  const icons = {
+    dashboard:"M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z",
+    log:"M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z",
+    checklist:"M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z",
+    stats:"M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z",
+    target:"M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z",
+    plus:"M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z",
+    trash:"M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z",
+    save:"M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z",
+  };
+  return React.createElement('svg', { width:size, height:size, viewBox:"0 0 24 24", fill:"currentColor" },
+    React.createElement('path', { d: icons[name] || icons.dashboard })
+  );
+};
+
+const lbl = { display:"block", fontSize:10, color:"#7a8a9a", marginBottom:4, letterSpacing:0.5, textTransform:"uppercase" };
+const badge = { fontSize:10, background:"#1a2744", color:"#a89060", padding:"2px 6px", borderRadius:4 };
+
+// ─── DASHBOARD ────────────────────────────────────────────────────────────────
+function Dashboard({ data }) {
+  const totalHours = data.studyLog.reduce((s,e) => s+(parseFloat(e.hours)||0),0);
+  const studiedSubjects = new Set(data.studyLog.map(e=>e.subject)).size;
+  const uniqueDays = new Set(data.studyLog.map(e=>e.date)).size;
+  const avgMin = uniqueDays>0 ? ((totalHours/uniqueDays)*60).toFixed(1) : 0;
+  const allChapters = Object.values(CHAPTERS).flat();
+  const completedTopics = allChapters.filter(ch=>{const c=data.checklists[ch.id];return c&&CHECKLIST_STAGES.every(s=>c.stages[s]);}).length;
+  const completionPct = allChapters.length>0 ? ((completedTopics/allChapters.length)*100).toFixed(1) : 0;
+  const dates = [...new Set(data.studyLog.map(e=>e.date))].sort().reverse();
+  let streak=0; const today=new Date().toISOString().slice(0,10); let check=new Date(today);
+  for(const d of dates){const diff=Math.round((check-new Date(d))/86400000);if(diff<=1){streak++;check=new Date(d);}else break;}
+  const subjectHours={};
+  SUBJECTS.forEach(s=>{subjectHours[s.id]=0;});
+  data.studyLog.forEach(e=>{const subj=SUBJECTS.find(s=>s.name===e.subject);if(subj)subjectHours[subj.id]+=parseFloat(e.hours)||0;});
+  const kpis=[
+    {label:"Total Hours",value:totalHours.toFixed(1),icon:"🕐",color:"#c9a227"},
+    {label:"Subjects Active",value:studiedSubjects,icon:"📚",color:"#60a5fa"},
+    {label:"Avg Min/Day",value:avgMin,icon:"📊",color:"#34d399"},
+    {label:"Completion %",value:completionPct+"%",icon:"🎯",color:"#a78bfa"},
+    {label:"Topics Done",value:completedTopics,icon:"✅",color:"#22d3ee"},
+    {label:"Study Streak",value:streak+" days",icon:"🔥",color:"#f472b6"},
+  ];
+  return (
+    <div style={{animation:"slideIn 0.3s ease"}}>
+      <h2 style={{color:"#c9a227",fontSize:16,letterSpacing:2,textAlign:"center",marginBottom:16,textTransform:"uppercase"}}>📊 Performance Dashboard</h2>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10,marginBottom:20}}>
+        {kpis.map(k=>(
+          <div key={k.label} style={{background:"#0d1b2a",border:"1px solid #2a3a54",borderRadius:10,padding:"12px 10px",textAlign:"center",borderTop:`2px solid ${k.color}`}}>
+            <div style={{fontSize:22}}>{k.icon}</div>
+            <div style={{fontSize:18,fontWeight:"bold",color:k.color}}>{k.value}</div>
+            <div style={{fontSize:10,color:"#7a8a9a",marginTop:2}}>{k.label}</div>
+          </div>
+        ))}
+      </div>
+      <h3 style={{color:"#c9a227",fontSize:13,letterSpacing:1,marginBottom:12,textTransform:"uppercase"}}>📚 Subject-wise Progress</h3>
+      {SUBJECTS.map(s=>{
+        const hrs=subjectHours[s.id]||0;
+        const pct=Math.min((hrs/TARGET_HOURS)*100,100);
+        const status=pct===0?"🔴 Not Started":pct<25?"🔴 Critical":pct<50?"🟡 In Progress":pct<75?"🔵 Good":"🟢 Excellent";
+        return(
+          <div key={s.id} style={{background:"#0d1b2a",border:"1px solid #2a3a54",borderRadius:10,padding:12,marginBottom:10}}>
+            <div style={{display:"flex",justifyContent:"space-between",marginBottom:6,flexWrap:"wrap",gap:4}}>
+              <div>
+                <span style={{fontSize:11,color:s.accent,fontWeight:"bold"}}>GROUP {s.group}</span>
+                <div style={{fontSize:13,color:"#e8dcc8"}}>{s.name}</div>
+              </div>
+              <div style={{textAlign:"right"}}>
+                <div style={{fontSize:14,color:s.accent,fontWeight:"bold"}}>{hrs.toFixed(1)}h / {TARGET_HOURS}h</div>
+                <div style={{fontSize:10,color:"#7a8a9a"}}>{status}</div>
+              </div>
+            </div>
+            <div style={{height:6,background:"#1a2744",borderRadius:3,overflow:"hidden"}}>
+              <div style={{height:"100%",width:pct+"%",background:`linear-gradient(90deg,${s.color},${s.accent})`,borderRadius:3,transition:"width 0.5s ease"}}/>
+            </div>
+            <div style={{fontSize:11,color:"#7a8a9a",marginTop:4}}>{pct.toFixed(1)}% complete</div>
+          </div>
+        );
+      })}
+      <div style={{background:"#0d1b2a",border:"1px solid #c9a22740",borderRadius:10,padding:12,marginTop:8,fontSize:11,color:"#a89060"}}>
+        💡 <strong>TIP:</strong> Use Study Log to enter daily hours · Checklists to tick off topics · Statistics for analysis · Targets to set exam dates
+      </div>
+    </div>
+  );
+}
+
+// ─── STUDY LOG ────────────────────────────────────────────────────────────────
+function StudyLog({ data, persist }) {
+  const [form,setForm]=useState({
+    date:new Date().toISOString().slice(0,10),hours:"",subject:SUBJECTS[0].name,
+    topics:"",chapter:"",mode:"Self Study",difficulty:"",questionsAttempted:"",questionsCorrect:"",
+    notes:"",revision:"No",mockTest:"No",mood:"🙂 Good"
+  });
+  const [showForm,setShowForm]=useState(false);
+  const [filter,setFilter]=useState("");
+  const chaptersForSubject=form.subject?(CHAPTERS[SUBJECTS.find(s=>s.name===form.subject)?.id]||[]):[];
+  const addEntry=()=>{
+    if(!form.date||!form.hours)return;
+    const accuracy=form.questionsAttempted>0?((form.questionsCorrect/form.questionsAttempted)*100).toFixed(1):"";
+    persist({...data,studyLog:[{...form,accuracy,id:Date.now()},...data.studyLog]});
+    setForm(f=>({...f,hours:"",topics:"",chapter:"",difficulty:"",questionsAttempted:"",questionsCorrect:"",notes:""}));
+    setShowForm(false);
+  };
+  const deleteEntry=id=>persist({...data,studyLog:data.studyLog.filter(e=>e.id!==id)});
+  const filtered=filter?data.studyLog.filter(e=>e.subject===filter||e.topics?.toLowerCase().includes(filter.toLowerCase())):data.studyLog;
+
+  return(
+    <div style={{animation:"slideIn 0.3s ease"}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
+        <h2 style={{color:"#c9a227",fontSize:16,letterSpacing:2,textTransform:"uppercase"}}>📝 Study Log</h2>
+        <button onClick={()=>setShowForm(!showForm)} style={{background:"#c9a227",color:"#0a0f1e",border:"none",borderRadius:8,padding:"8px 14px",cursor:"pointer",fontWeight:"bold",fontSize:12,display:"flex",alignItems:"center",gap:6}}>
+          <Icon name="plus" size={16}/>{showForm?"Cancel":"Add Entry"}
+        </button>
+      </div>
+
+      {showForm&&(
+        <div style={{background:"#0d1b2a",border:"1px solid #c9a227",borderRadius:10,padding:14,marginBottom:16}}>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:10}}>
+            <div><label style={lbl}>Date</label><input type="date" value={form.date} onChange={e=>setForm(f=>({...f,date:e.target.value}))}/></div>
+            <div><label style={lbl}>Hours Studied</label><input type="number" step="0.5" min="0" max="24" placeholder="e.g. 3.5" value={form.hours} onChange={e=>setForm(f=>({...f,hours:e.target.value}))}/></div>
+          </div>
+          <div style={{marginBottom:10}}><label style={lbl}>Subject</label>
+            <select value={form.subject} onChange={e=>setForm(f=>({...f,subject:e.target.value,chapter:""}))}>
+              {SUBJECTS.map(s=><option key={s.id} value={s.name}>{s.name}</option>)}
+            </select>
+          </div>
+          <div style={{marginBottom:10}}><label style={lbl}>Chapter</label>
+            <select value={form.chapter} onChange={e=>setForm(f=>({...f,chapter:e.target.value}))}>
+              <option value="">– Select Chapter –</option>
+              {chaptersForSubject.map(ch=><option key={ch.id} value={ch.name}>{ch.name}</option>)}
+            </select>
+          </div>
+          <div style={{marginBottom:10}}><label style={lbl}>Topics Covered</label>
+            <input type="text" placeholder="Brief description" value={form.topics} onChange={e=>setForm(f=>({...f,topics:e.target.value}))}/>
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:10}}>
+            <div><label style={lbl}>Study Mode</label>
+              <select value={form.mode} onChange={e=>setForm(f=>({...f,mode:e.target.value}))}>
+                {STUDY_MODES.map(m=><option key={m}>{m}</option>)}
+              </select>
+            </div>
+            <div><label style={lbl}>Difficulty</label>
+              <select value={form.difficulty} onChange={e=>setForm(f=>({...f,difficulty:e.target.value}))}>
+                <option value="">– Optional –</option>
+                {DIFFICULTY_LEVELS.map(d=><option key={d}>{d}</option>)}
+              </select>
+            </div>
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:10}}>
+            <div><label style={lbl}>Questions Attempted</label><input type="number" min="0" value={form.questionsAttempted} onChange={e=>setForm(f=>({...f,questionsAttempted:e.target.value}))}/></div>
+            <div><label style={lbl}>Questions Correct</label><input type="number" min="0" value={form.questionsCorrect} onChange={e=>setForm(f=>({...f,questionsCorrect:e.target.value}))}/></div>
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10,marginBottom:10}}>
+            <div><label style={lbl}>Revision?</label>
+              <select value={form.revision} onChange={e=>setForm(f=>({...f,revision:e.target.value}))}>
+                <option>No</option><option>Yes</option>
+              </select>
+            </div>
+            <div><label style={lbl}>Mock Test?</label>
+              <select value={form.mockTest} onChange={e=>setForm(f=>({...f,mockTest:e.target.value}))}>
+                <option>No</option><option>Yes</option>
+              </select>
+            </div>
+            <div><label style={lbl}>Mood</label>
+              <select value={form.mood} onChange={e=>setForm(f=>({...f,mood:e.target.value}))}>
+                {MOODS.map(m=><option key={m}>{m}</option>)}
+              </select>
+            </div>
+          </div>
+          <div style={{marginBottom:12}}><label style={lbl}>Notes / Doubts</label>
+            <textarea rows={2} placeholder="Any notes or doubts…" value={form.notes} onChange={e=>setForm(f=>({...f,notes:e.target.value}))} style={{resize:"vertical"}}/>
+          </div>
+          <button onClick={addEntry} style={{width:"100%",background:"#c9a227",color:"#0a0f1e",border:"none",borderRadius:8,padding:"10px",cursor:"pointer",fontWeight:"bold",fontSize:14}}>
+            ✓ Save Entry
+          </button>
+        </div>
+      )}
+
+      <div style={{marginBottom:12}}>
+        <select value={filter} onChange={e=>setFilter(e.target.value)}>
+          <option value="">All Subjects</option>
+          {SUBJECTS.map(s=><option key={s.id} value={s.name}>{s.name}</option>)}
+        </select>
+      </div>
+      <div style={{fontSize:12,color:"#7a8a9a",marginBottom:8}}>{filtered.length} entries · {filtered.reduce((s,e)=>s+(parseFloat(e.hours)||0),0).toFixed(1)}h total</div>
+      {filtered.length===0&&<div style={{textAlign:"center",color:"#7a8a9a",padding:40}}>No entries yet. Add your first study session!</div>}
+      {filtered.map(entry=>{
+        const subj=SUBJECTS.find(s=>s.name===entry.subject);
+        return(
+          <div key={entry.id} style={{background:"#0d1b2a",border:"1px solid #2a3a54",borderLeft:`3px solid ${subj?.accent||"#c9a227"}`,borderRadius:8,padding:12,marginBottom:8}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
+              <div style={{flex:1}}>
+                <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:4}}>
+                  <span style={{fontSize:11,color:subj?.accent||"#c9a227",fontWeight:"bold"}}>{entry.subject}</span>
+                  <span style={{fontSize:11,color:"#7a8a9a"}}>{entry.date}</span>
+                  <span style={{fontSize:12,color:"#c9a227",fontWeight:"bold"}}>{entry.hours}h</span>
+                  <span style={{fontSize:11,color:"#a89060"}}>{entry.mood}</span>
+                </div>
+                {entry.chapter&&<div style={{fontSize:12,color:"#e8dcc8",marginBottom:2}}>📖 {entry.chapter}</div>}
+                {entry.topics&&<div style={{fontSize:11,color:"#a89060"}}>{entry.topics}</div>}
+                <div style={{display:"flex",gap:8,flexWrap:"wrap",marginTop:4}}>
+                  {entry.mode&&<span style={badge}>{entry.mode}</span>}
+                  {entry.difficulty&&<span style={badge}>{entry.difficulty}</span>}
+                  {entry.revision==="Yes"&&<span style={{...badge,color:"#34d399"}}>📝 Revision</span>}
+                  {entry.mockTest==="Yes"&&<span style={{...badge,color:"#f472b6"}}>📋 Mock</span>}
+                  {entry.accuracy&&<span style={{...badge,color:"#22d3ee"}}>🎯 {entry.accuracy}% acc.</span>}
+                </div>
+                {entry.notes&&<div style={{fontSize:11,color:"#7a8a9a",marginTop:4,fontStyle:"italic"}}>💬 {entry.notes}</div>}
+              </div>
+              <button onClick={()=>deleteEntry(entry.id)} style={{background:"none",border:"none",color:"#5a3a3a",cursor:"pointer",padding:4,flexShrink:0}}>
+                <Icon name="trash" size={16}/>
+              </button>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ─── CHECKLIST ────────────────────────────────────────────────────────────────
+function Checklist({ data, persist }) {
+  const [activeSubject,setActiveSubject]=useState("P1");
+  const [expandedChapter,setExpandedChapter]=useState(null);
+  const toggleStage=(chapId,stage)=>{
+    const cur=data.checklists[chapId]?.stages[stage]||false;
+    persist({...data,checklists:{...data.checklists,[chapId]:{...data.checklists[chapId],stages:{...(data.checklists[chapId]?.stages||{}),[stage]:!cur}}}});
+  };
+  const setNote=(chapId,note)=>persist({...data,checklists:{...data.checklists,[chapId]:{...data.checklists[chapId],notes:note}}});
+  const chapters=CHAPTERS[activeSubject]||[];
+  const subj=SUBJECTS.find(s=>s.id===activeSubject);
+  const completedInSubject=chapters.filter(ch=>{const c=data.checklists[ch.id];return c&&CHECKLIST_STAGES.every(s=>c.stages[s]);}).length;
+  const stageProgress=chapId=>{const c=data.checklists[chapId];if(!c)return 0;return CHECKLIST_STAGES.filter(s=>c.stages[s]).length;};
+  const statusLabel=done=>{
+    if(done===0)return{label:"⬜ Not Started",color:"#7a8a9a"};
+    if(done===CHECKLIST_STAGES.length)return{label:"✅ Completed",color:"#34d399"};
+    if(done>=5)return{label:"🔵 Near Complete",color:"#60a5fa"};
+    if(done>=3)return{label:"🟡 In Progress",color:"#f59e0b"};
+    return{label:"🔴 Started",color:"#f87171"};
+  };
+  return(
+    <div style={{animation:"slideIn 0.3s ease"}}>
+      <h2 style={{color:"#c9a227",fontSize:16,letterSpacing:2,textTransform:"uppercase",marginBottom:12,textAlign:"center"}}>✅ Topic Checklists</h2>
+      <div style={{display:"flex",gap:6,overflowX:"auto",marginBottom:16,paddingBottom:4,scrollbarWidth:"none"}}>
+        {SUBJECTS.map(s=>(
+          <button key={s.id} onClick={()=>setActiveSubject(s.id)} style={{
+            flexShrink:0,padding:"6px 12px",border:`1px solid ${activeSubject===s.id?s.accent:"#2a3a54"}`,
+            borderRadius:20,background:activeSubject===s.id?s.color:"transparent",
+            color:activeSubject===s.id?s.accent:"#7a8a9a",cursor:"pointer",fontSize:11,fontFamily:"Georgia,serif"
+          }}>{s.short}</button>
+        ))}
+      </div>
+      <div style={{background:`linear-gradient(135deg,${subj.color},${subj.color}88)`,borderRadius:10,padding:12,marginBottom:12,border:`1px solid ${subj.accent}`}}>
+        <div style={{fontSize:14,color:subj.accent,fontWeight:"bold"}}>PAPER {activeSubject.slice(1)} – {subj.name}</div>
+        <div style={{fontSize:12,color:"#a89060",marginTop:4}}>{completedInSubject}/{chapters.length} chapters completed</div>
+        <div style={{height:4,background:"#1a2744",borderRadius:2,marginTop:8,overflow:"hidden"}}>
+          <div style={{height:"100%",width:`${(completedInSubject/chapters.length)*100}%`,background:subj.accent,transition:"width 0.5s"}}/>
+        </div>
+      </div>
+      {chapters.map(ch=>{
+        const done=stageProgress(ch.id);
+        const status=statusLabel(done);
+        const expanded=expandedChapter===ch.id;
+        const c=data.checklists[ch.id]||{stages:{},notes:""};
+        return(
+          <div key={ch.id} style={{background:"#0d1b2a",border:`1px solid ${done===CHECKLIST_STAGES.length?subj.accent+"60":"#2a3a54"}`,borderRadius:10,marginBottom:8,overflow:"hidden"}}>
+            <div onClick={()=>setExpandedChapter(expanded?null:ch.id)} style={{padding:"12px",cursor:"pointer",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+              <div style={{flex:1,paddingRight:8}}>
+                <div style={{fontSize:12,color:"#e8dcc8"}}>{ch.name}</div>
+                <div style={{display:"flex",gap:8,marginTop:4,alignItems:"center"}}>
+                  <span style={{fontSize:10,color:status.color}}>{status.label}</span>
+                  <span style={{fontSize:10,color:"#7a8a9a"}}>{ch.type}</span>
+                </div>
+              </div>
+              <div style={{display:"flex",gap:2,flexShrink:0}}>
+                {CHECKLIST_STAGES.map(s=>(
+                  <div key={s} style={{width:8,height:8,borderRadius:2,background:c.stages[s]?subj.accent:"#2a3a54"}}/>
+                ))}
+              </div>
+            </div>
+            {expanded&&(
+              <div style={{padding:"0 12px 12px",borderTop:"1px solid #1a2744"}}>
+                <div style={{paddingTop:10,marginBottom:10}}>
+                  {CHECKLIST_STAGES.map(stage=>(
+                    <div key={stage} onClick={()=>toggleStage(ch.id,stage)} style={{display:"flex",alignItems:"center",gap:10,padding:"7px 0",cursor:"pointer",borderBottom:"1px solid #1a2744"}}>
+                      <div style={{width:22,height:22,borderRadius:4,border:`2px solid ${c.stages[stage]?subj.accent:"#3a4a64"}`,background:c.stages[stage]?subj.accent:"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                        {c.stages[stage]&&<span style={{color:"#0a0f1e",fontSize:14,fontWeight:"bold"}}>✓</span>}
+                      </div>
+                      <span style={{fontSize:13,color:c.stages[stage]?"#e8dcc8":"#7a8a9a"}}>{stage}</span>
+                    </div>
+                  ))}
+                </div>
+                <label style={lbl}>Notes</label>
+                <textarea rows={2} placeholder="Add notes for this chapter…" value={c.notes||""} onChange={e=>setNote(ch.id,e.target.value)} style={{resize:"vertical"}}/>
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ─── STATISTICS ───────────────────────────────────────────────────────────────
+function Statistics({ data }) {
+  const log=data.studyLog;
+  const totalHours=log.reduce((s,e)=>s+(parseFloat(e.hours)||0),0);
+  const uniqueDays=[...new Set(log.map(e=>e.date))];
+  const avgPerDay=uniqueDays.length>0?totalHours/uniqueDays.length:0;
+  const hours=uniqueDays.map(d=>log.filter(e=>e.date===d).reduce((s,e)=>s+(parseFloat(e.hours)||0),0)).filter(h=>h>0);
+  const maxH=Math.max(...hours,0);
+  const minH=hours.length>0?Math.min(...hours):0;
+  const sorted=[...hours].sort((a,b)=>a-b);
+  const median=sorted.length>0?sorted[Math.floor(sorted.length/2)]:0;
+  const variance=hours.length>0?hours.reduce((s,h)=>s+Math.pow(h-avgPerDay,2),0)/hours.length:0;
+  const stdDev=Math.sqrt(variance);
+  const subjectStats=SUBJECTS.map(s=>{
+    const entries=log.filter(e=>e.subject===s.name);
+    const totalH=entries.reduce((sum,e)=>sum+(parseFloat(e.hours)||0),0);
+    const sessions=entries.filter(e=>parseFloat(e.hours)>0).length;
+    const avgH=sessions>0?totalH/sessions:0;
+    const gap=TARGET_HOURS-totalH;
+    return{...s,totalH,sessions,avgH,gap};
+  });
+  const weeklyHours={};
+  log.forEach(e=>{
+    const d=new Date(e.date);
+    const startOfYear=new Date(d.getFullYear(),0,1);
+    const week=Math.ceil(((d-startOfYear)/86400000+startOfYear.getDay()+1)/7);
+    weeklyHours[week]=(weeklyHours[week]||0)+(parseFloat(e.hours)||0);
+  });
+  const weekEntries=Object.entries(weeklyHours).sort((a,b)=>a[0]-b[0]).slice(-12);
+  const moodCounts={};MOODS.forEach(m=>moodCounts[m]=0);
+  log.forEach(e=>{if(e.mood)moodCounts[e.mood]=(moodCounts[e.mood]||0)+1;});
+  return(
+    <div style={{animation:"slideIn 0.3s ease"}}>
+      <h2 style={{color:"#c9a227",fontSize:16,letterSpacing:2,textTransform:"uppercase",marginBottom:16,textAlign:"center"}}>📈 Statistical Analysis</h2>
+      <div style={{background:"#0d1b2a",border:"1px solid #2a3a54",borderRadius:10,padding:14,marginBottom:16}}>
+        <h3 style={{color:"#c9a227",fontSize:13,margin:"0 0 12px",letterSpacing:1}}>📊 DESCRIPTIVE STATISTICS</h3>
+        {[
+          ["Total Hours Studied",totalHours.toFixed(2)],
+          ["No. of Study Days",uniqueDays.length],
+          ["Average Hours / Day",avgPerDay.toFixed(2)],
+          ["Median Hours / Day",median.toFixed(2)],
+          ["Std Deviation",stdDev.toFixed(4)],
+          ["Maximum (single day)",maxH.toFixed(2)],
+          ["Minimum (study day)",minH.toFixed(2)],
+          ["Variance",variance.toFixed(4)],
+          ["Days > 8 Hours",hours.filter(h=>h>8).length],
+          ["Days < 4 Hours",hours.filter(h=>h<4).length],
+        ].map(([k,v])=>(
+          <div key={k} style={{display:"flex",justifyContent:"space-between",padding:"5px 0",borderBottom:"1px solid #1a2744",fontSize:12}}>
+            <span style={{color:"#a89060"}}>{k}</span>
+            <span style={{color:"#e8dcc8",fontWeight:"bold"}}>{v}</span>
+          </div>
+        ))}
+      </div>
+      <div style={{background:"#0d1b2a",border:"1px solid #2a3a54",borderRadius:10,padding:14,marginBottom:16}}>
+        <h3 style={{color:"#c9a227",fontSize:13,margin:"0 0 12px",letterSpacing:1}}>📚 SUBJECT-WISE BREAKDOWN</h3>
+        {subjectStats.map(s=>(
+          <div key={s.id} style={{marginBottom:12}}>
+            <div style={{display:"flex",justifyContent:"space-between",fontSize:12,marginBottom:4}}>
+              <span style={{color:s.accent}}>{s.name}</span>
+              <span style={{color:"#e8dcc8"}}>{s.totalH.toFixed(2)}h / {TARGET_HOURS}h</span>
+            </div>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:6}}>
+              {[["Sessions",s.sessions],["Avg/Session",s.avgH.toFixed(2)+"h"],["Gap",s.gap.toFixed(1)+"h"]].map(([k,v])=>(
+                <div key={k} style={{background:"#1a2744",borderRadius:6,padding:"6px 8px",textAlign:"center"}}>
+                  <div style={{fontSize:13,color:s.accent}}>{v}</div>
+                  <div style={{fontSize:9,color:"#7a8a9a"}}>{k}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+      {weekEntries.length>0&&(
+        <div style={{background:"#0d1b2a",border:"1px solid #2a3a54",borderRadius:10,padding:14,marginBottom:16}}>
+          <h3 style={{color:"#c9a227",fontSize:13,margin:"0 0 12px",letterSpacing:1}}>📅 WEEKLY STUDY TREND (Last 12 Weeks)</h3>
+          <div style={{display:"flex",alignItems:"flex-end",gap:4,height:80}}>
+            {weekEntries.map(([week,hrs])=>{
+              const pct=maxH>0?(hrs/Math.max(...weekEntries.map(e=>e[1])))*100:0;
+              return(
+                <div key={week} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:4}}>
+                  <div style={{width:"100%",height:pct+"%",background:"#c9a227",borderRadius:"2px 2px 0 0",minHeight:pct>0?3:0,transition:"height 0.5s"}}/>
+                  <div style={{fontSize:9,color:"#7a8a9a"}}>W{week}</div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+      {log.length>0&&(
+        <div style={{background:"#0d1b2a",border:"1px solid #2a3a54",borderRadius:10,padding:14}}>
+          <h3 style={{color:"#c9a227",fontSize:13,margin:"0 0 12px",letterSpacing:1}}>😊 MOOD TRACKER</h3>
+          {Object.entries(moodCounts).filter(([,v])=>v>0).map(([mood,count])=>(
+            <div key={mood} style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
+              <span style={{fontSize:12,width:100}}>{mood}</span>
+              <div style={{flex:1,height:8,background:"#1a2744",borderRadius:4,overflow:"hidden"}}>
+                <div style={{height:"100%",width:`${(count/log.length)*100}%`,background:"#c9a227",borderRadius:4}}/>
+              </div>
+              <span style={{fontSize:11,color:"#7a8a9a",width:20}}>{count}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── TARGETS ──────────────────────────────────────────────────────────────────
+function Targets({ data, persist }) {
+  const t=data.targets;
+  const today=new Date().toISOString().slice(0,10);
+  const daysG1=Math.max(0,Math.ceil((new Date(t.examDateG1)-new Date(today))/86400000));
+  const daysG2=Math.max(0,Math.ceil((new Date(t.examDateG2)-new Date(today))/86400000));
+  const update=(key,val)=>persist({...data,targets:{...t,[key]:val}});
+  const updateMock=(subjectId,field,val)=>{
+    const scores={...t.mockScores,[subjectId]:{...t.mockScores[subjectId],[field]:val}};
+    persist({...data,targets:{...t,mockScores:scores}});
+  };
+  return(
+    <div style={{animation:"slideIn 0.3s ease"}}>
+      <h2 style={{color:"#c9a227",fontSize:16,letterSpacing:2,textTransform:"uppercase",marginBottom:16,textAlign:"center"}}>🎯 Exam Targets & Planner</h2>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:16}}>
+        {[{label:"Group 1",days:daysG1,color:"#60a5fa"},{label:"Group 2",days:daysG2,color:"#a78bfa"}].map(g=>(
+          <div key={g.label} style={{background:"#0d1b2a",border:`1px solid ${g.color}`,borderRadius:10,padding:16,textAlign:"center"}}>
+            <div style={{fontSize:32,fontWeight:"bold",color:g.color}}>{g.days}</div>
+            <div style={{fontSize:11,color:"#a89060"}}>days to {g.label}</div>
+          </div>
+        ))}
+      </div>
+      <div style={{background:"#0d1b2a",border:"1px solid #2a3a54",borderRadius:10,padding:14,marginBottom:16}}>
+        <h3 style={{color:"#c9a227",fontSize:13,margin:"0 0 12px",letterSpacing:1}}>📋 EXAM CONFIGURATION</h3>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:10}}>
+          <div><label style={lbl}>Exam Date – Group 1</label><input type="date" value={t.examDateG1} onChange={e=>update("examDateG1",e.target.value)}/></div>
+          <div><label style={lbl}>Exam Date – Group 2</label><input type="date" value={t.examDateG2} onChange={e=>update("examDateG2",e.target.value)}/></div>
+        </div>
+        <div><label style={lbl}>Daily Hours Target</label><input type="number" min="1" max="24" value={t.dailyTarget} onChange={e=>update("dailyTarget",e.target.value)}/></div>
+        <div style={{background:"#1a2744",borderRadius:8,padding:10,marginTop:10,fontSize:11,color:"#a89060"}}>
+          📌 <strong>How to use:</strong> Study Log → enter daily hours · Checklists → tick completed stages · Statistics → auto charts · Targets → set dates & track mocks
+        </div>
+      </div>
+      <div style={{background:"#0d1b2a",border:"1px solid #2a3a54",borderRadius:10,padding:14}}>
+        <h3 style={{color:"#c9a227",fontSize:13,margin:"0 0 12px",letterSpacing:1}}>🏆 TARGET SCORE TRACKER</h3>
+        {SUBJECTS.map(s=>{
+          const ms=t.mockScores[s.id]||{target:65,m1:"",m2:"",m3:""};
+          const scores=[ms.m1,ms.m2,ms.m3].map(Number).filter(n=>n>0);
+          const avg=scores.length>0?(scores.reduce((a,b)=>a+b,0)/scores.length).toFixed(1):"–";
+          const gap=scores.length>0?(ms.target-avg).toFixed(1):"–";
+          return(
+            <div key={s.id} style={{borderBottom:"1px solid #1a2744",paddingBottom:12,marginBottom:12}}>
+              <div style={{fontSize:12,color:s.accent,marginBottom:8,fontWeight:"bold"}}>{s.name}</div>
+              <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8}}>
+                <div><label style={{...lbl,color:"#c9a227"}}>Target</label><input type="number" value={ms.target} onChange={e=>updateMock(s.id,"target",e.target.value)}/></div>
+                <div><label style={lbl}>Mock 1</label><input type="number" value={ms.m1} onChange={e=>updateMock(s.id,"m1",e.target.value)}/></div>
+                <div><label style={lbl}>Mock 2</label><input type="number" value={ms.m2} onChange={e=>updateMock(s.id,"m2",e.target.value)}/></div>
+                <div><label style={lbl}>Mock 3</label><input type="number" value={ms.m3} onChange={e=>updateMock(s.id,"m3",e.target.value)}/></div>
+              </div>
+              <div style={{display:"flex",gap:16,marginTop:6,fontSize:11}}>
+                <span style={{color:"#7a8a9a"}}>Avg Mock: <strong style={{color:avg!=="–"&&avg>=ms.target?"#34d399":"#f87171"}}>{avg}</strong></span>
+                <span style={{color:"#7a8a9a"}}>Gap: <strong style={{color:gap!=="–"&&parseFloat(gap)<=0?"#34d399":"#f59e0b"}}>{gap!=="–"?(parseFloat(gap)<=0?"✅ Target Met":`${gap} marks to go`):"–"}</strong></span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ─── MAIN APP ─────────────────────────────────────────────────────────────────
+function App() {
+  const [tab,setTab]=useState("dashboard");
+  const [data,setData]=useState(null);
+  const [saving,setSaving]=useState(false);
+  const [installPrompt,setInstallPrompt]=useState(null);
+  const [showInstall,setShowInstall]=useState(false);
+
+  useEffect(()=>{
+    const saved=loadData();
+    if(saved){
+      const def=defaultState();
+      saved.checklists={...def.checklists,...saved.checklists};
+      setData(saved);
+    } else { setData(defaultState()); }
+  },[]);
+
+  useEffect(()=>{
+    const handler=e=>{e.preventDefault();setInstallPrompt(e);setShowInstall(true);};
+    window.addEventListener('beforeinstallprompt',handler);
+    return()=>window.removeEventListener('beforeinstallprompt',handler);
+  },[]);
+
+  const persist=useCallback((newData)=>{
+    setData(newData);setSaving(true);saveData(newData);
+    setTimeout(()=>setSaving(false),600);
+  },[]);
+
+  const handleInstall=async()=>{
+    if(!installPrompt)return;
+    installPrompt.prompt();
+    await installPrompt.userChoice;
+    setShowInstall(false);setInstallPrompt(null);
+  };
+
+  if(!data) return(
+    <div style={{minHeight:"100vh",background:"#0a0f1e",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"Georgia,serif",color:"#c9a227"}}>
+      <div style={{textAlign:"center"}}>
+        <div style={{fontSize:48,marginBottom:12}}>⚖️</div>
+        <div style={{fontSize:18,letterSpacing:2}}>Loading your tracker…</div>
+      </div>
+    </div>
+  );
+
+  const TABS=[
+    {id:"dashboard",label:"Dashboard",icon:"dashboard"},
+    {id:"log",label:"Study Log",icon:"log"},
+    {id:"checklist",label:"Checklists",icon:"checklist"},
+    {id:"stats",label:"Statistics",icon:"stats"},
+    {id:"targets",label:"Targets",icon:"target"},
+  ];
+
+  return(
+    <div style={{minHeight:"100vh",background:"#0a0f1e",fontFamily:"Georgia,serif",color:"#e8dcc8"}}>
+      {/* Install Banner */}
+      {showInstall&&(
+        <div style={{background:"#1a2744",borderBottom:"1px solid #c9a227",padding:"10px 16px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:12}}>
+          <div style={{fontSize:12,color:"#e8dcc8"}}>📱 Install CA Tracker on your phone for offline access!</div>
+          <div style={{display:"flex",gap:8}}>
+            <button onClick={handleInstall} style={{background:"#c9a227",color:"#0a0f1e",border:"none",borderRadius:6,padding:"6px 12px",cursor:"pointer",fontWeight:"bold",fontSize:12,fontFamily:"Georgia,serif"}}>Install</button>
+            <button onClick={()=>setShowInstall(false)} style={{background:"none",border:"1px solid #2a3a54",color:"#7a8a9a",borderRadius:6,padding:"6px 10px",cursor:"pointer",fontSize:12,fontFamily:"Georgia,serif"}}>✕</button>
+          </div>
+        </div>
+      )}
+
+      {/* Header */}
+      <div style={{background:"linear-gradient(135deg,#0d1b2a 0%,#1a2744 50%,#0d1b2a 100%)",borderBottom:"2px solid #c9a227",padding:"12px 16px",display:"flex",alignItems:"center",gap:12,position:"sticky",top:0,zIndex:50}}>
+        <div style={{width:40,height:40,borderRadius:"50%",background:"#c9a227",display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,flexShrink:0}}>⚖️</div>
+        <div style={{flex:1,minWidth:0}}>
+          <div style={{fontSize:13,fontWeight:"bold",color:"#c9a227",letterSpacing:1}}>CA INTERMEDIATE</div>
+          <div style={{fontSize:10,color:"#a89060",letterSpacing:0.5}}>ICAI NEW SCHEME · STUDY TRACKER</div>
+        </div>
+        {saving&&<div style={{fontSize:11,color:"#34d399",animation:"pulse 1s infinite"}}>✓ Saved</div>}
+      </div>
+
+      {/* Tab Bar */}
+      <div style={{background:"#0d1b2a",borderBottom:"1px solid #2a3a54",display:"flex",overflowX:"auto",scrollbarWidth:"none",position:"sticky",top:64,zIndex:49}}>
+        {TABS.map(t=>(
+          <button key={t.id} onClick={()=>setTab(t.id)} style={{
+            flex:"1 0 auto",padding:"10px 8px",border:"none",background:"none",
+            color:tab===t.id?"#c9a227":"#7a8a9a",borderBottom:tab===t.id?"2px solid #c9a227":"2px solid transparent",
+            cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:3,fontSize:10,letterSpacing:0.5,transition:"color 0.2s",fontFamily:"Georgia,serif"
+          }}>
+            <Icon name={t.icon} size={16}/>
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Content */}
+      <div style={{padding:"16px",maxWidth:800,margin:"0 auto",paddingBottom:32}}>
+        {tab==="dashboard"&&<Dashboard data={data}/>}
+        {tab==="log"&&<StudyLog data={data} persist={persist}/>}
+        {tab==="checklist"&&<Checklist data={data} persist={persist}/>}
+        {tab==="stats"&&<Statistics data={data}/>}
+        {tab==="targets"&&<Targets data={data} persist={persist}/>}
+      </div>
+    </div>
+  );
+}
+
+const root=ReactDOM.createRoot(document.getElementById('root'));
+root.render(React.createElement(App));
+</script>
+
+<script>
+// Register Service Worker for PWA
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg => console.log('SW registered:', reg.scope))
+      .catch(err => console.log('SW registration failed:', err));
+  });
+}
+</script>
+</body>
+</html>
